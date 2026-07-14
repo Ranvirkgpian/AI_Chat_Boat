@@ -1,7 +1,7 @@
 // Embedding Service — Gemini Embedding API with graceful 429 fallback
 import { GoogleGenAI } from '@google/genai';
 
-const EMBEDDING_MODEL = process.env.GEMINI_EMBEDDING_MODEL || 'text-embedding-004';
+const EMBEDDING_MODEL = process.env.GEMINI_EMBEDDING_MODEL || 'gemini-embedding-001';
 let ai = null;
 
 function getClient() {
