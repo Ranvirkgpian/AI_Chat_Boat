@@ -12,6 +12,22 @@
 
 ---
 
+## 📸 Screenshots
+
+### Chat Experience — Dark Mode
+![Dark Mode](Screenshot/Dark-Mode.png)
+
+### Chat Experience — Light Mode
+![Light Mode](Screenshot/Light-Mode.png)
+
+### Smart Panel — Live Retrieval with Relevance Scores
+![Smart Panel](Screenshot/Smart_Panel.png)
+
+### Admin Dashboard
+![Admin Dashboard](Screenshot/Admin_Dashboard.png)
+
+---
+
 ## What is FlowSupport?
 
 Most customer support teams spend the majority of their time answering the same repetitive questions — order tracking, refund policies, account issues — while customers who genuinely need a human get stuck in the same queue.
