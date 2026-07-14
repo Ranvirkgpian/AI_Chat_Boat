@@ -1,155 +1,193 @@
-# 🚀 FlowSupport — AI-Powered Support Chat Bot
+# FlowSupport 🤖
 
-> **Built for the FlowZint AI Hackathon**  
-> Get answers instantly. Talk to a human when it matters.
+**An AI-powered support chatbot with real-time RAG, intelligent escalation, and a live-updating admin dashboard — built for the FlowZint AI Hackathon.**
 
-FlowSupport is a production-quality AI support chatbot that resolves ~85% of routine customer queries using RAG-powered knowledge retrieval, intelligently escalates the rest to human agents, and provides a full admin dashboard with live analytics.
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://ai-chat-boat-neon.vercel.app)
+[![Backend](https://img.shields.io/badge/backend-online-blue)](https://ai-chat-boat-lwxr.onrender.com)
 
-## ✨ Features
+🔗 **Live App:** https://ai-chat-boat-neon.vercel.app
+🔗 **Backend API:** https://ai-chat-boat-lwxr.onrender.com
 
-### 🤖 AI Chat Experience
-- **Real-time streaming** bot responses (token-by-token via Socket.IO)
-- **RAG-powered answers** grounded in an editable knowledge base — never hallucinated
-- **Source attribution** showing which KB articles each answer came from
-- **Smart suggestion chips** generated dynamically based on conversation context
-- **Markdown rendering** for rich bot responses (lists, bold, code blocks, links)
-- **Session memory** with full conversation history
+> ⚠️ Note: the backend runs on Render's free tier, which spins down after inactivity. The first request after idle time may take 30–50 seconds to wake up — please give it a moment on first load.
 
-### 🧠 Intelligent AI Pipeline
-- **Intent classification** (FAQ, billing, orders, technical, escalation, etc.)
-- **Sentiment analysis** on every user message
-- **Personalized answers** with mock e-commerce data (order tracking, account info)
-- **Escalation engine** — auto-detects frustration, repeated failures, or explicit requests
+---
 
-### 📊 Admin Dashboard
-- **Analytics** — Resolution rate, deflection rate, intent distribution, sentiment trends
-- **Knowledge Base Manager** — CRUD articles, see retrieval stats, auto-reindex
-- **Live Conversations** — Monitor active chats in real time
-- **Ticket Queue** — Kanban board (New → In Progress → Resolved)
+## What is FlowSupport?
 
-### 🎨 Premium UI/UX
-- **"Aurora Support" design system** — glassmorphism, animated gradients, micro-interactions
-- **Dark/light mode** toggle
-- **Framer Motion animations** — message bubbles, typing indicator, page transitions
-- **Three-column responsive layout** — sidebar, chat thread, smart panel
-- **Mobile-optimized** with slide-over drawers
+Most customer support teams spend the majority of their time answering the same repetitive questions — order tracking, refund policies, account issues — while customers who genuinely need a human get stuck in the same queue.
 
-## 🏗 Architecture
+**FlowSupport** is an AI support assistant that:
+- Answers routine questions instantly using **real Retrieval-Augmented Generation (RAG)** grounded in an editable knowledge base — not hallucinated guesses.
+- Cites its sources on every answer, with live relevance scores, so both the user and the business can trust what it says.
+- Detects when a conversation needs a human — via intent, sentiment, and explicit request — and hands off cleanly with an auto-generated summary.
+- Gives the business a full **admin dashboard** to monitor live conversations, view analytics, manage the knowledge base, and track escalated tickets — all in real time, with zero redeploy needed to update content.
+
+---
+
+## ✨ Key Features
+
+### Chat Experience
+- Real-time, token-by-token streaming responses via Socket.IO
+- Source-cited answers with expandable "N sources" attribution
+- Dynamic **Smart Panel** showing retrieved knowledge base articles with live relevance percentages, updating per query
+- Context-aware follow-up action chips (e.g. "Start a return," "Refund timeline," "Exchange instead") generated based on the conversation
+- Auto-generated, human-readable conversation titles in the sidebar
+- Full light/dark theme support
+- File attachment and voice input support
+
+### AI & RAG Pipeline
+- Real semantic embeddings via Google's Gemini Embedding API (`gemini-embedding-001`)
+- Custom vector store for similarity search over knowledge base chunks
+- Intent classification and sentiment analysis on every message, with local keyword-based fallbacks to reduce API load
+- Honest uncertainty handling — the bot explicitly says when it doesn't have enough information, rather than fabricating an answer
+
+### Escalation Engine
+- Automatically triggers on explicit requests ("talk to a human"), low retrieval confidence, or negative sentiment signals
+- Auto-generates a conversation summary so a human agent isn't starting from zero
+- Displays estimated wait time to the user
+
+### Admin Dashboard
+- **Live Conversations** — monitor active chats in real time, with escalation status visible at a glance
+- **Analytics** — resolution rate, response times, and top user intents computed from real conversation data
+- **Knowledge Base Manager** — add, edit, or delete articles live; new content is immediately searchable by the bot with no redeploy
+- **Ticket Queue** — Kanban-style view of escalated conversations with auto-generated summaries
+- Secure JWT-based authentication
+
+---
+
+## 🛠️ Tech Stack
+
+**Frontend**
+- React 18 + Vite
+- Tailwind CSS
+- Zustand (state management)
+- Socket.IO client
+- Recharts (analytics visualizations)
+
+**Backend**
+- Node.js + Express
+- Socket.IO (real-time chat)
+- SQLite (via sql.js) for conversations, tickets, KB articles, and users
+- Custom in-memory/on-disk vector store for RAG retrieval
+- JWT authentication
+
+**AI**
+- Google Gemini API
+  - `gemini-2.5-flash` for chat generation and streaming
+  - `gemini-embedding-001` for semantic embeddings
+- Local keyword-based fallbacks for intent/sentiment classification to reduce API usage
+
+**Infrastructure**
+- Docker (backend containerization)
+- Deployed on **Render** (backend) + **Vercel** (frontend)
+
+---
+
+## 📐 Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   React Frontend                     │
-│  ┌──────────┐  ┌──────────┐  ┌───────────────────┐  │
-│  │ Landing  │  │  Chat UI │  │ Admin Dashboard   │  │
-│  │  Page    │  │(Socket.IO│  │   (REST API)      │  │
-│  └──────────┘  │ Client)  │  └───────────────────┘  │
-│                └────┬─────┘                          │
-└─────────────────────┼────────────────────────────────┘
-                      │ WebSocket + REST
-┌─────────────────────┼────────────────────────────────┐
-│              Express Backend                          │
-│  ┌─────────┐ ┌──────────┐ ┌──────────────┐          │
-│  │ Intent  │ │Sentiment │ │  Escalation  │          │
-│  │Classify │ │ Analysis │ │   Engine     │          │
-│  └────┬────┘ └────┬─────┘ └──────┬───────┘          │
-│       └───────────┼──────────────┘                   │
-│              ┌────┴─────┐                            │
-│              │   RAG    │                            │
-│              │ Pipeline │                            │
-│              └────┬─────┘                            │
-│  ┌──────────┐ ┌───┴────┐                            │
-│  │  SQLite  │ │ Vector │                            │
-│  │   (DB)   │ │ Store  │                            │
-│  └──────────┘ └────────┘                            │
-└──────────────────────────────────────────────────────┘
+┌─────────────────────┐         ┌──────────────────────────┐
+│   React Frontend      │◄──────►│   Express + Socket.IO      │
+│   (Vercel)             │  WSS   │   Backend (Render)         │
+│                        │ REST   │                            │
+│  - Chat UI             │        │  - RAG Pipeline            │
+│  - Smart Panel         │        │  - Intent/Sentiment        │
+│  - Admin Dashboard     │        │  - Escalation Engine       │
+└─────────────────────┘         │  - JWT Auth                │
+                                   └────────────┬─────────────┘
+                                                │
+                              ┌─────────────────┼─────────────────┐
+                              ▼                 ▼                 ▼
+                       ┌────────────┐   ┌───────────────┐  ┌──────────────┐
+                       │  SQLite DB   │   │  Vector Store   │  │  Gemini API    │
+                       │  (sql.js)    │   │  (embeddings)   │  │  (chat + embed)│
+                       └────────────┘   └───────────────┘  └──────────────┘
 ```
 
-## 🛠 Tech Stack
+---
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, Vite 8, Tailwind CSS v4, Framer Motion, Zustand, Socket.IO Client |
-| Backend | Node.js, Express, Socket.IO, JWT Auth |
-| AI/NLP | Gemini 2.5 Flash (chat), Gemini 2.5 Flash Lite (classification), Gemini Embedding 2 (vectors) |
-| Database | SQLite via sql.js (zero-setup, file-based) |
-| Vector Store | In-memory cosine similarity with JSON persistence |
-
-## 🚀 Quick Start
+## 🚀 Getting Started (Local Development)
 
 ### Prerequisites
-- Node.js 18+ and npm
-- A [Google AI Studio](https://aistudio.google.com/) API key (free tier)
+- Node.js 18+
+- A Gemini API key ([Google AI Studio](https://aistudio.google.com/))
 
-### Setup
-
+### 1. Clone the repo
 ```bash
-# 1. Clone and navigate
-cd flowsupport
+git clone https://github.com/Ranvirkgpian/AI_Chat_Boat.git
+cd AI_Chat_Boat
+```
 
-# 2. Install dependencies
-cd backend && npm install
-cd ../frontend && npm install
-cd ..
-
-# 3. Configure environment
+### 2. Backend setup
+```bash
+cd backend
+npm install
 cp .env.example .env
-# Edit .env and add your GEMINI_API_KEY
-
-# 4. Seed the database
-cd backend && npm run seed
-cd ..
-
-# 5. Start both servers
-cd backend && npm run dev    # → http://localhost:3001
-cd frontend && npm run dev   # → http://localhost:5173
+# Edit .env and add your GEMINI_API_KEY and JWT_SECRET
+npm run seed      # seeds the demo knowledge base
+npm run dev        # starts the backend on http://localhost:3000
 ```
 
-### Demo Credentials
-- **Admin Login**: admin@flowsupport.com / admin123
-- **Chat**: No login required — start chatting immediately
-
-## 📁 Project Structure
-
-```
-flowsupport/
-├── backend/
-│   ├── src/
-│   │   ├── server.js              # Express + Socket.IO entry
-│   │   ├── db/                    # SQLite schema, connection, seed
-│   │   ├── routes/                # REST API (auth, kb, tickets, analytics)
-│   │   ├── services/              # RAG, LLM, embedding, intent, sentiment
-│   │   ├── middleware/            # JWT auth, rate limiting
-│   │   └── socket/                # Real-time chat handlers
-│   └── data/                      # SQLite DB + vector store (auto-created)
-├── frontend/
-│   ├── src/
-│   │   ├── pages/                 # Landing, Chat, Admin Login, Dashboard
-│   │   ├── components/
-│   │   │   ├── chat/              # Message bubbles, input, typing, panels
-│   │   │   ├── admin/             # KB manager, analytics, tickets
-│   │   │   └── ui/                # Glass cards, buttons, avatars
-│   │   └── lib/                   # Socket.IO, API client, Zustand stores
-├── .env.example                   # Environment config template
-├── docker-compose.yml             # Full-stack deployment
-├── DECISIONS.md                   # Architectural decisions log
-└── README.md
+### 3. Frontend setup
+```bash
+cd ../frontend
+npm install
+cp .env.example .env
+# Edit .env — set VITE_API_URL and VITE_SOCKET_URL to http://localhost:3000
+npm run dev        # starts the frontend on http://localhost:5173
 ```
 
-## 🎯 AI Models Used
+### 4. Try it out
+- Open `http://localhost:5173` for the chat interface
+- Open `http://localhost:5173/admin` and log in with the seeded demo admin account (see `DECISIONS.md` for credentials)
 
-| Model | Purpose |
-|-------|---------|
-| **Gemini 2.5 Flash** | Main chat responses, RAG generation, conversation summaries |
-| **Gemini 2.5 Flash Lite** | Intent classification, sentiment analysis |
-| **Gemini Embedding 2** | Text embeddings for vector similarity search |
+---
 
-## 📊 Demo Scenarios
+## 🔑 Environment Variables
 
-1. **RAG Resolution**: Ask "What is your return policy?" → Bot answers from KB with source attribution
-2. **Order Tracking**: Ask "Where is my order #4521?" → Personalized response with tracking info
-3. **Escalation**: Say "This is unacceptable, I want to talk to a manager" → Escalation triggers, ticket created
-4. **Admin Dashboard**: Login as admin → View analytics, manage KB, monitor conversations
+**Backend (`backend/.env`)**
+```
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_EMBEDDING_MODEL=gemini-embedding-001
+JWT_SECRET=your_random_secret_string
+PORT=3000
+NODE_ENV=development
+FRONTEND_URL=http://localhost:5173
+```
 
-## 📝 License
+**Frontend (`frontend/.env`)**
+```
+VITE_API_URL=http://localhost:3000/api
+VITE_SOCKET_URL=http://localhost:3000
+```
 
-Built for the FlowZint AI Hackathon 2026.
+---
+
+## 🎥 Demo
+
+A full walkthrough covering the chat experience, RAG source attribution, escalation flow, and live knowledge-base editing is included in the submission.
+
+**Demo flow highlights:**
+1. Ask a routine question → get a streamed, source-cited answer with live relevance scores
+2. Click "Talk to a human" → see the escalation banner with an auto-generated summary
+3. In the admin dashboard, add a new knowledge base article → immediately ask the bot about it in a new chat and watch it answer correctly, with no redeploy
+
+---
+
+## 📌 Known Limitations
+
+- Backend runs on Render's free tier, so it spins down after inactivity and the SQLite database resets on redeploy (seed script re-runs automatically on deploy).
+- Gemini API usage is subject to free-tier rate limits; the app includes local keyword-based fallbacks and mock-embedding degradation to stay functional under quota pressure, but response quality may vary if the quota is exhausted during heavy testing.
+- Single demo admin account — no multi-user admin management in this version.
+
+---
+
+## 🏆 Built For
+
+**FlowZint AI Hackathon** — judged on Innovation & Creativity, Real-World Problem Solving, AI Automation, User Experience, and Scalability & Functionality.
+
+---
+
+## 📄 License
+
+This project was built for hackathon submission purposes.
