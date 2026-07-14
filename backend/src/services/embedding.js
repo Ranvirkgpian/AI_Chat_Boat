@@ -25,7 +25,7 @@ export async function embedText(text) {
 
   try {
     const response = await client.models.embedContent({
-      model: EMBEDDING_MODEL,
+      model: `models/${EMBEDDING_MODEL}`,
       contents: [{ role: 'user', parts: [{ text }] }],
     });
     return response.embeddings[0].values;
